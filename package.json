@@ -2,12 +2,12 @@
   "name": "app-lab-build",
   "version": "1.0.0",
   "description": "Gives a build functionality to code.org's app lab.",
-  "license": "ISC",
-  "author": "",
+  "license": "MIT",
+  "author": "nuclearfusion564",
   "type": "module",
   "main": "build.js",
   "scripts": {
-    "build": "node build.ts"
+    "build": "node build.js"
   },
   "devDependencies": {
     "@types/node": "^25.0.2"

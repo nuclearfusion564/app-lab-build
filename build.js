@@ -16,8 +16,9 @@ let output = "";
 lines.forEach((line) => {
   if (line.trim().startsWith("// @include")) {
     const statements = line.split(" ");
+    const fileName = statements[2]; // Assigning variable for statements[2] for readability
 
-    const utilFilePath = path.join("src", "utils", statements[2]);
+    const utilFilePath = path.join("src", "utils", fileName);
 
     if (!fs.existsSync(utilFilePath)) {
       console.error(utilFilePath + " isn't a valid path");
@@ -25,8 +26,9 @@ lines.forEach((line) => {
     }
     const utilFileContent = fs.readFileSync(utilFilePath, "utf-8");
 
-    output += `// ==== ${statements[2]} ====\n`;
+    output += `// ==== ${fileName} ====\n`;
     output += utilFileContent + "\n\n";
+    console.log("Including " + fileName)
   } else {
     output += line + "\n";
   }
