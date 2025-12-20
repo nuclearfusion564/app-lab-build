@@ -3,3 +3,4 @@
 .DS_Store
 output.js
 node_modules
+*.csv
