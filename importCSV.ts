@@ -1,38 +1,19 @@
 import csv from "csv-parser";
-import readLine from "node:readline";
 import fs from "fs";
+import { getCSVLocation, getFileName } from "./modules/userPrompts.ts";
 
-async function getCSVLocation(): Promise<string> {
+type newRow = { [key: string]: any };
+
+async function loadCSV(filePath: string): Promise<newRow[]> {
   return new Promise((resolve, reject) => {
-    const rl = readLine.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    rl.question("Input CSV file location: ", (answer) => {
-      const fileLocation = answer.replaceAll(/["'`]/g, "");
-
-      fs.access(fileLocation, fs.constants.F_OK, (err) => {
-        console.error(err);
-        reject(err);
-
-        process.exit(1);
-      });
-
-      resolve(fileLocation);
-    });
-  });
-}
-
-async function loadCSV(filePath: string): Promise<unknown> {
-  return new Promise((resolve, reject) => {
-    const importedData: unknown[] = [];
+    const importedData: newRow[] = [];
 
     fs.createReadStream(filePath)
       .pipe(csv())
       .on("data", (row) => {
         importedData.push(row);
-      }).on("end", () => {
+      })
+      .on("end", () => {
         resolve(importedData);
       })
       .on("error", (error) => {
@@ -43,9 +24,35 @@ async function loadCSV(filePath: string): Promise<unknown> {
 
 async function main() {
   const fileLocation = await getCSVLocation();
-  const importedData = await loadCSV(fileLocation);
+  const importedData: newRow[] = await loadCSV(fileLocation);
+  const fileName = await getFileName();
+  const newFileLocation = "./src/utils/" + fileName;
 
-  console.log(importedData)
+  let output = "";
+
+  output += `var data = [`
+
+  importedData.forEach((element) => {
+    output += ',\n   {'
+
+    const elementKeys = Object.keys(element);
+
+    for (let i = 0; i < elementKeys.length; i++) {
+      if (elementKeys[i].includes(" ")) {
+        output += `\n    '${elementKeys[i]}': '${element[elementKeys[i]]}',`;
+        continue;
+      }
+      output += `\n     ${elementKeys[i]}: '${element[elementKeys[i]]}',`;
+
+      if (i === elementKeys.length - 1){ // To make sure that it's the last item
+        output += "\n   }"
+      }
+    }
+  });
+
+  output += "\n];"
+
+  fs.writeFileSync(newFileLocation, output);
 }
 
 main().catch((error) => {
